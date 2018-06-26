@@ -130,8 +130,8 @@ static inline int ipv6_l3_from_lxc(struct __sk_buff *skb,
 	 * address.
 	 */
 	if ((svc = lb6_lookup_service(skb, &key)) != NULL) {
-		ret = lb6_local(skb, l3_off, l4_off, &csum_off, &key, tuple, svc,
-				&ct_state_new);
+		ret = lb6_local(&CT_MAP6, skb, l3_off, l4_off,
+				&csum_off, &key, tuple, svc, &ct_state_new);
 		if (IS_ERR(ret))
 			return ret;
 	}
@@ -154,7 +154,7 @@ skip_service_lookup:
 	 * POLICY_SKIP if the packet is a reply packet to an existing
 	 * incoming connection. */
 	ret = ct_lookup6(&CT_MAP6, tuple, skb, l4_off, SECLABEL, CT_EGRESS,
-			 &ct_state);
+			 &ct_state, true);
 	if (ret < 0)
 		return ret;
 
@@ -436,7 +436,7 @@ static inline int handle_ipv4_from_lxc(struct __sk_buff *skb)
 	ct_state_new.orig_dport = key.dport;
 #ifdef ENABLE_IPV4
 	if ((svc = lb4_lookup_service(skb, &key)) != NULL) {
-		ret = lb4_local(skb, l3_off, l4_off, &csum_off,
+		ret = lb4_local(&CT_MAP4, skb, l3_off, l4_off, &csum_off,
 				&key, &tuple, svc, &ct_state_new, ip4->saddr);
 		if (IS_ERR(ret))
 			return ret;
@@ -459,7 +459,7 @@ skip_service_lookup:
 	 * POLICY_SKIP if the packet is a reply packet to an existing
 	 * incoming connection. */
 	ret = ct_lookup4(&CT_MAP4, &tuple, skb, l4_off, SECLABEL, CT_EGRESS,
-			 &ct_state);
+			 &ct_state, true);
 	if (ret < 0)
 		return ret;
 
@@ -757,7 +757,7 @@ static inline int __inline__ ipv6_policy(struct __sk_buff *skb, int ifindex, __u
 	}
 
 	ret = ct_lookup6(&CT_MAP6, &tuple, skb, l4_off, SECLABEL, CT_INGRESS,
-			 &ct_state);
+			 &ct_state, true);
 	if (ret < 0)
 		return ret;
 
@@ -858,7 +858,7 @@ static inline int __inline__ ipv4_policy(struct __sk_buff *skb, int ifindex, __u
 	l4_off = ETH_HLEN + ipv4_hdrlen(ip4);
 	csum_l4_offset_and_flags(tuple.nexthdr, &csum_off);
 
-	ret = ct_lookup4(&CT_MAP4, &tuple, skb, l4_off, SECLABEL, CT_INGRESS, &ct_state);
+	ret = ct_lookup4(&CT_MAP4, &tuple, skb, l4_off, SECLABEL, CT_INGRESS, &ct_state, true);
 	if (ret < 0)
 		return ret;
 

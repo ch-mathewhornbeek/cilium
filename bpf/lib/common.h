@@ -263,6 +263,7 @@ enum {
 #define DROP_NO_TUNNEL_ENDPOINT -160
 #define DROP_PROXYMAP_CREATE_FAILED	-161
 #define DROP_POLICY_CIDR		-162
+#define DROP_CT_UPDATE_FAILED	-163
 
 /* Cilium metrics reason for forwarding packet.
  * If reason > 0 then this is a drop reason and value corresponds to -(DROP_*)
@@ -387,7 +388,7 @@ struct ct_entry {
 	      seen_non_syn:1,
 	      reserve:11;
 	__u16 rev_nat_index;
-	__be16 unused;
+	__u16 slave;
 	__u32 src_sec_id;
 };
 
@@ -443,6 +444,7 @@ struct ct_state {
 	__be32 addr;
 	__be32 svc_addr;
 	__u32 src_sec_id;
+	__u16 slave;
 };
 
 /* Lifetime of a proxy redirection entry. All proxies should be using TCP

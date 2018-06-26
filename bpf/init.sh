@@ -351,7 +351,7 @@ elif [ "$MODE" = "lb" ]; then
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 
 		CALLS_MAP="cilium_calls_lb"
-		OPTS="-DLB_L3 -DLB_L4"
+		OPTS="-DLB_L3 -DLB_L4 -DSECLABEL=${ID_WORLD}"
 		bpf_load $NATIVE_DEV "$OPTS" "ingress" bpf_lb.c bpf_lb.o from-netdev $CALLS_MAP
 
 		echo "$NATIVE_DEV" > $RUNDIR/device.state

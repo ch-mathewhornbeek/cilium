@@ -493,12 +493,15 @@ ip route add 2.2.2.2/32 via 3.3.3.3
 
 ip link set lbtest2 up
 
+ID_HOST=1
+ID_WORLD=2
+
 LIB=/var/lib/cilium/bpf
 RUN=/var/run/cilium/state
 NH_IFINDEX=$(cat /sys/class/net/cilium_host/ifindex)
 NH_MAC=$(ip link show cilium_host | grep ether | awk '{print $2}')
 NH_MAC="{.addr=$(mac2array $NH_MAC)}"
-CLANG_OPTS="-D__NR_CPUS__=$(nproc) -DLB_L3 -DLB_REDIRECT=$NH_IFINDEX -DLB_DSTMAC=$NH_MAC -DCALLS_MAP=lbtest -O2 -target bpf -I. -I$LIB/include -I$RUN/globals -DDEBUG -Wno-address-of-packed-member -Wno-unknown-warning-option"
+CLANG_OPTS="-D__NR_CPUS__=$(nproc) -DLB_L3 -DLB_REDIRECT=$NH_IFINDEX -DSECLABEL=${ID_WORLD} -DLB_DSTMAC=$NH_MAC -DCALLS_MAP=lbtest -O2 -target bpf -I. -I$LIB/include -I$RUN/globals -DDEBUG -Wno-address-of-packed-member -Wno-unknown-warning-option"
 touch netdev_config.h
 clang $CLANG_OPTS -c $LIB/bpf_lb.c -o tmp_lb.o
 
